@@ -42,16 +42,44 @@ python ingest.py \
   --url <NYC_green_taxi_csv_url>
 ```
 
-## Sample queries
+## Homework answers
+
+**Q1 — `--rm` flag**
+
+![Q1](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/725e8b0e-c327-46ca-a429-5cdd3ba6a35f)
+
+**Q2 — pgAdmin version:** `0.42.0`
+
+**Q3 — Trips with same pickup and drop-off date (2019-09-18):** `15,612`
 
 ```sql
--- Trips where pickup and drop-off were both on 2019-09-18
 SELECT COUNT(*)
 FROM green_taxi
 WHERE CAST(lpep_pickup_datetime AS date) = '2019-09-18'
   AND CAST(lpep_dropoff_datetime AS date) = '2019-09-18';
+```
 
--- Drop-off zone with the largest tip from pickups in Astoria
+![Q3](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/564e3aec-f953-452a-9d8f-b017fff00b79)
+
+**Q4 — Day with the longest trip distance:** `2019-09-26`
+
+```sql
+SELECT MAX(trip_distance), CAST(lpep_pickup_datetime AS DATE)
+FROM green_taxi
+GROUP BY lpep_pickup_datetime
+ORDER BY MAX(trip_distance) DESC
+LIMIT 10;
+```
+
+![Q4](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/128acd63-9607-41d6-b231-06b497ac9150)
+
+**Q5 — Boroughs with total amount > $50,000 on 2019-09-18:** `Brooklyn`, `Manhattan`, `Queens`
+
+![Q5](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/f873dee1-cfd2-4f2c-b967-455541e33fa4)
+
+**Q6 — Drop-off zone with largest tip from Astoria pickups:** `JFK Airport`
+
+```sql
 SELECT z."Zone" AS drop_off_zone
 FROM green_taxi gt
 JOIN zone z ON gt."DOLocationID" = z."LocationID"
@@ -61,6 +89,8 @@ WHERE gt."PULocationID" = (SELECT "LocationID" FROM zone WHERE "Zone" = 'Astoria
 ORDER BY gt.tip_amount DESC
 LIMIT 1;
 ```
+
+![Q6](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/2220b61a-c210-4a35-9108-0f6e098ca649)
 
 ## Skills demonstrated
 
