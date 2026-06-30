@@ -1,42 +1,69 @@
-# homework-zoomcamp-1
+# Data Engineering Zoomcamp — Week 1
 
+Week-1 homework submission for the [DataTalks.Club Data Engineering Zoomcamp (2024)](https://github.com/DataTalksClub/data-engineering-zoomcamp). Covers containerised data ingestion into PostgreSQL using Docker and Python.
 
-This for answer homework for data-engineer-zoompcamp year 2024
-https://github.com/DataTalksClub/data-engineering-zoomcamp
+## What it does
 
-1. --rm
-   
-   ![image](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/725e8b0e-c327-46ca-a429-5cdd3ba6a35f)
+Builds a local data pipeline that:
+1. Spins up a PostgreSQL instance and pgAdmin via Docker Compose.
+2. Ingests NYC Green Taxi trip data (September 2019) into PostgreSQL using a Python script.
+3. Queries the loaded data to answer the homework questions.
 
-2. 0.42.0
+## Tech Stack
 
-3. 15612
+| Tool | Role |
+|---|---|
+| Docker + Docker Compose | Container orchestration |
+| PostgreSQL | Data storage |
+| Python (SQLAlchemy, pandas) | Data ingestion script |
+| pgAdmin | Database GUI |
+
+## Files
+
+| File | Description |
+|---|---|
+| `ingest.py` | CLI ingestion script — accepts connection params as arguments |
+| `command to start docker.txt` | Docker commands used to run the environment |
+
+## How to run
 
 ```bash
-   SELECT COUNT(*) FROM green_taxi WHERE CAST(lpep_dropoff_datetime as date)= '2019-09-18' AND CAST(lpep_pickup_datetime AS date) = '2019-09-18'
+# Start Postgres + pgAdmin
+docker-compose up -d   # or see the commands in 'command to start docker.txt'
+
+# Ingest the data
+python ingest.py \
+  --user postgres \
+  --password YOUR_PASSWORD \
+  --host localhost \
+  --port 5432 \
+  --db ny_taxi \
+  --table green_taxi \
+  --url <NYC_green_taxi_csv_url>
 ```
-![image](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/564e3aec-f953-452a-9d8f-b017fff00b79)
 
-4. 2019-09-26
-```bash
-   SELECT MAX(trip_distance), CAST(lpep_pickup_datetime AS DATE) FROM green_taxi GROUP BY lpep_pickup_datetime ORDER BY max DESC limit 10
-```
-   ![image](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/128acd63-9607-41d6-b231-06b497ac9150)
+## Sample queries
 
-5. "Brooklyn" "Manhattan" "Queens"
-   ![image](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/f873dee1-cfd2-4f2c-b967-455541e33fa4)
+```sql
+-- Trips where pickup and drop-off were both on 2019-09-18
+SELECT COUNT(*)
+FROM green_taxi
+WHERE CAST(lpep_pickup_datetime AS date) = '2019-09-18'
+  AND CAST(lpep_dropoff_datetime AS date) = '2019-09-18';
 
-6. JFK Airport
-```bash
-   SELECT z."Zone" AS drop_off_zone_with_largest_tip
+-- Drop-off zone with the largest tip from pickups in Astoria
+SELECT z."Zone" AS drop_off_zone
 FROM green_taxi gt
 JOIN zone z ON gt."DOLocationID" = z."LocationID"
 WHERE gt."PULocationID" = (SELECT "LocationID" FROM zone WHERE "Zone" = 'Astoria')
-  AND EXTRACT(YEAR FROM gt."lpep_pickup_datetime") = 2019
-  AND EXTRACT(MONTH FROM gt."lpep_pickup_datetime") = 9
-ORDER BY gt."tip_amount" DESC
+  AND EXTRACT(YEAR FROM gt.lpep_pickup_datetime) = 2019
+  AND EXTRACT(MONTH FROM gt.lpep_pickup_datetime) = 9
+ORDER BY gt.tip_amount DESC
 LIMIT 1;
 ```
 
-   ![image](https://github.com/mysecret39/homework-zoomcamp-1/assets/88777199/2220b61a-c210-4a35-9108-0f6e098ca649)
+## Skills demonstrated
 
+- Docker and Docker Compose setup for a local data stack
+- Python data ingestion with SQLAlchemy and pandas
+- PostgreSQL querying: date functions, joins, aggregations, subqueries
